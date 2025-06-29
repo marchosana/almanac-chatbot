@@ -74,15 +74,15 @@
   <!-- Header -->
   <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
     <div class="w-8"></div>
-    <h1 class="text-lg font-semibold flex-1 text-center">FUTURE FUTURESCAPER from 2040</h1>
+    <h1 class="text-lg font-semibold flex-1 text-center">Felisha</h1>
     <div class="flex items-center space-x-2">
-      <button
+      <!-- <button
         class="bg-[#007AFF] text-white px-3 py-1 rounded-full shadow hover:bg-[#005bb5] focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
         onclick={() => showFeedbackModal = true}
         aria-label="Leave feedback"
       >
         Feedback
-      </button>
+      </button> -->
       <button onclick={toggleDarkMode} class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
         {#if isDarkMode}
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
