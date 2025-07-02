@@ -123,6 +123,8 @@ Memberships: $240,000/year
 Food vendors: $23,000/year
 Community events: $3,000/year
 Rental space + consulting: $234,000/year
+Consulting allows students to earn money for themselves and for the Hub. the HUB acts as a middleman. 
+for example, if a student is hired to design a website for a local business or a logo, the Hub takes a cut of the payment, but learners are still paid considaribly.
 Remaining gap: ~$1M
 Covered by grants, philanthropy, sponsorships
 Cost per learner (covered by external support): $1,000
