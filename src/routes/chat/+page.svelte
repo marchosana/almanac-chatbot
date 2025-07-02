@@ -15,14 +15,12 @@
   let feedbackSubmitted = $state(false);
   let feedbackError = $state('');
 
-  // Initialize dark mode from localStorage or system preference
   $effect(() => {
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       isDarkMode = true;
     }
   });
 
-  // Update localStorage and apply/remove 'dark' class
   $effect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -43,6 +41,12 @@
       const form = (event.target as HTMLElement).closest('form');
       if (form) form.requestSubmit();
     }
+  }
+
+  function scrollInputIntoView() {
+    setTimeout(() => {
+      document.querySelector('textarea')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
   }
 
   async function submitFeedback() {
@@ -70,19 +74,12 @@
   }
 </script>
 
-<div class="flex flex-col h-screen bg-[#F2F2F7] dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+<div class="flex flex-col min-h-[100dvh] bg-[#F2F2F7] dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
   <!-- Header -->
   <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
     <div class="w-8"></div>
     <h1 class="text-lg font-semibold flex-1 text-center">Felisha</h1>
     <div class="flex items-center space-x-2">
-      <!-- <button
-        class="bg-[#007AFF] text-white px-3 py-1 rounded-full shadow hover:bg-[#005bb5] focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
-        onclick={() => showFeedbackModal = true}
-        aria-label="Leave feedback"
-      >
-        Feedback
-      </button> -->
       <button onclick={toggleDarkMode} class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
         {#if isDarkMode}
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -97,7 +94,7 @@
     </div>
   </div>
 
-  <!-- Messages Container -->
+  <!-- Messages -->
   <div class="flex-1 overflow-y-auto px-4 py-6 space-y-3">
     {#each messages as message}
       <div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
@@ -122,8 +119,8 @@
       </div>
     {/if}
   </div>
-  
-  <!-- Input Area -->
+
+  <!-- Input -->
   <div class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3">
     <form
       method="POST"
@@ -131,59 +128,45 @@
         const message = formData.get('message') as string;
         if (!message) return;
 
-        // Append current messages history to formData
         formData.append('conversationHistory', JSON.stringify(messages));
-
         messages = [...messages, { role: 'user', content: message }];
         inputMessage = '';
         isLoading = true;
 
         return async ({ result }) => {
-          console.log('Form result:', result);
           isLoading = false;
-
           if (result.type === 'success') {
             try {
               if (result.data?.success && typeof result.data.data === 'string') {
                 messages = [...messages, { role: 'assistant', content: result.data.data }];
               } else {
-                console.error('Unexpected response format:', result.data);
-                messages = [...messages, { 
-                  role: 'assistant', 
-                  content: 'Sorry, I received an unexpected response format.' 
-                }];
+                messages = [...messages, { role: 'assistant', content: 'Sorry, I received an unexpected response format.' }];
               }
-            } catch (e) {
-              console.error('Error processing response:', e);
-              messages = [...messages, { 
-                role: 'assistant', 
-                content: 'Sorry, I encountered an error processing the response.' 
-              }];
+            } catch {
+              messages = [...messages, { role: 'assistant', content: 'Sorry, I encountered an error processing the response.' }];
             }
           } else {
-            console.error('Error:', result);
-            messages = [...messages, { 
-              role: 'assistant', 
-              content: 'Sorry, I encountered an error. Please try again.' 
-            }];
+            messages = [...messages, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }];
           }
         };
       }}
       class="flex items-center space-x-3"
     >
       <div class="flex-1 bg-[#F2F2F7] dark:bg-gray-700 rounded-2xl px-4 py-1.5">
-        <textarea
-          bind:value={inputMessage}
-          onkeydown={handleKeydown}
-          name="message"
-          placeholder="iMessage"
-          class="w-full resize-none bg-transparent focus:outline-none text-[15px] leading-[1.3] border-none ring-0 focus:shadow-none focus:border-transparent focus:ring-transparent"
-          rows="1"
-        ></textarea>
+       <textarea
+  bind:value={inputMessage}
+  onkeydown={handleKeydown}
+  onfocus={scrollInputIntoView}
+  name="message"
+  placeholder="Type your message..."
+  class="w-full resize-none bg-transparent focus:outline-none text-[15px] leading-[1.3] border-none ring-0"
+  rows="1"
+>
+</textarea>
       </div>
       <button
         type="submit"
-        class="bg-[#007AFF] text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#0066CC] focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="bg-[#007AFF] text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#0066CC] focus:outline-none focus:ring-2 focus:ring-[#007AFF] disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={isLoading || !inputMessage.trim()}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -235,21 +218,20 @@
     min-height: 24px;
     max-height: 120px;
   }
-  
-  /* Custom scrollbar for webkit browsers */
+
   ::-webkit-scrollbar {
     width: 8px;
   }
-  
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background: #C7C7CC;
     border-radius: 4px;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     background: #AEAEB2;
   }
@@ -259,4 +241,4 @@
     box-shadow: none !important;
     border-color: transparent !important;
   }
-</style> 
+</style>
