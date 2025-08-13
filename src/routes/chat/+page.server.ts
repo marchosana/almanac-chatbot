@@ -245,7 +245,7 @@ export const actions: Actions = {
           'X-Title': 'Almanac Chatbot' 
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-4-maverick:free',
+          model: 'meta-llama/llama-3.2-3b-instruct:free',
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             ...conversationHistory,
