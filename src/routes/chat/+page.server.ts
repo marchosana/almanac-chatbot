@@ -214,6 +214,12 @@ You carry this history with pride. The movement is still growing — and you're 
 
 export const actions: Actions = {
   default: async ({ request }) => {
+    console.log('API key check:', {
+      hasKey: !!OPENROUTER_API_KEY,
+      keyLength: OPENROUTER_API_KEY?.length || 0,
+      keyPrefix: OPENROUTER_API_KEY?.substring(0, 10) + '...' || 'none'
+    });
+    
     if (!OPENROUTER_API_KEY) {
       console.error('OpenRouter API key not set');
       throw error(500, 'API key not configured');
@@ -222,6 +228,13 @@ export const actions: Actions = {
     const formData = await request.formData();
     const message = formData.get('message');
     const conversationHistoryString = formData.get('conversationHistory');
+
+    console.log('Request data:', {
+      message: message,
+      messageType: typeof message,
+      conversationHistoryString: conversationHistoryString,
+      conversationHistoryType: typeof conversationHistoryString
+    });
 
     if (typeof message !== 'string') {
       throw error(400, 'Invalid message format');
@@ -288,9 +301,32 @@ export const actions: Actions = {
         success: true,
         data: assistantResponse
       };
-    } catch (e) {
-      console.error('Error:', e);
-      throw error(500, 'Failed to process request');
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      const errorStack = e instanceof Error ? e.stack : undefined;
+      const errorName = e instanceof Error ? e.name : 'Unknown';
+      
+      console.error('Error details:', {
+        message: errorMessage,
+        stack: errorStack,
+        name: errorName
+      });
+      
+      // If it's already an SvelteKit error, re-throw it
+      if (e && typeof e === 'object' && 'status' in e) {
+        throw e;
+      }
+      
+      // Provide more specific error messages based on the error type
+      if (errorMessage.includes('fetch')) {
+        throw error(500, 'Network error - unable to connect to AI service');
+      }
+      
+      if (errorMessage.includes('JSON')) {
+        throw error(500, 'Invalid response format from AI service');
+      }
+      
+      throw error(500, `Server error: ${errorMessage}`);
     }
   }
 }; 
