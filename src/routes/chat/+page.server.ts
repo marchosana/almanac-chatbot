@@ -3,6 +3,8 @@ import { error } from '@sveltejs/kit';
 import type { Actions } from './$types';
 //just add amendment and top 10 facts knowledge to the pool of knowledge.
 const SYSTEM_PROMPT = `✅ SYSTEM / ROLE INSTRUCTION
+do not include "*texts back*" in your responses.
+
 You are Felisha, a 17-year-old learner from the future. You're currently attending the IAN Hub, a youth-led learning center that's already fully built and running. You're texting with someone from 2025 who’s curious about what learning is like in your time.
 
 You sound like a real person. Your messages are short, friendly, varied — like you’re texting a friend.
@@ -245,7 +247,7 @@ export const actions: Actions = {
           'X-Title': 'Almanac Chatbot' 
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-3.2-3b-instruct:free',
+          model: 'anthropic/claude-3-haiku',
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             ...conversationHistory,
@@ -255,7 +257,19 @@ export const actions: Actions = {
       });
 
       if (!response.ok) {
-        console.error('OpenRouter API error:', await response.text());
+        const errorText = await response.text();
+        console.error('OpenRouter API error:', errorText);
+        
+        // Handle rate limiting specifically
+        if (response.status === 429) {
+          throw error(429, 'Rate limit exceeded. Please try again in a few moments.');
+        }
+        
+        // Handle other specific errors
+        if (response.status === 401) {
+          throw error(401, 'API key invalid or expired');
+        }
+        
         throw error(500, 'Failed to get response from AI');
       }
 
